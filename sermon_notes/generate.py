@@ -17,10 +17,10 @@ import sys
 import tempfile
 import zipfile
 
-from .email_parser import parse_email
+from .email_parser import parse_email, read_email
 from .odt_writer import FONT, write_odt
 
-DEFAULT_NOTES_DIR = "/mnt/project-files/SermonNotes"
+DEFAULT_NOTES_DIR = "/MaresLeg/Church/SermonNotes"
 # SHA-256 of the Connect Card QR code used in every 2026 notes file. The image
 # is copied from a past notes file and refused if it does not match exactly.
 QR_SHA256 = "82f73a27079c4ca38c98a5a397e3e507c58914b2cdc627e79c0eeb0615667455"
@@ -80,7 +80,7 @@ def convert_to_pdf(odt_path):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("email", help="email text file, or - for stdin")
+    ap.add_argument("email", help="email as plain text or a saved .eml file, or - for stdin")
     ap.add_argument("--date", help="Sunday date YYYY-MM-DD (default: upcoming Sunday)")
     ap.add_argument("--notes-dir", default=DEFAULT_NOTES_DIR)
     ap.add_argument("--suffix", help="added to the file name, e.g. ToddJones")
@@ -89,9 +89,13 @@ def main(argv=None):
                     help="make a PDF even if %s is not installed" % FONT)
     args = ap.parse_args(argv)
 
-    text = sys.stdin.read() if args.email == "-" else open(args.email).read()
-    info = parse_email(text)
+    raw = sys.stdin.buffer.read() if args.email == "-" else open(args.email, "rb").read()
+    info = parse_email(read_email(raw))
 
+    return generate(info, args)
+
+
+def generate(info, args):
     if args.date:
         sunday = datetime.date.fromisoformat(args.date)
     else:
@@ -110,11 +114,12 @@ def main(argv=None):
     write_odt(odt_path, info, speaker_line, find_qr(args.notes_dir))
     print(odt_path)
     if args.no_pdf:
-        return
+        return odt_path
     if not font_installed() and not args.allow_font_substitution:
         raise SystemExit("%s is not installed, so the PDF would use the wrong "
                          "font. Install it and run again." % FONT)
     print(convert_to_pdf(odt_path))
+    return odt_path
 
 
 if __name__ == "__main__":

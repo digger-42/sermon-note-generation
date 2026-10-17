@@ -1,0 +1,10 @@
+# Watches the inbox Thunderbird saves Katie's emails into.
+[Unit]
+Description=Watch for new Sermon Notes emails
+
+[Path]
+PathChanged=/MaresLeg/Church/SermonEmails/inbox
+MakeDirectory=yes
+
+[Install]
+WantedBy=default.target

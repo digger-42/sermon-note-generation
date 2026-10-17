@@ -1,0 +1,8 @@
+# Started by sermon-notes.path. WorkingDirectory is where you cloned the repo.
+[Unit]
+Description=Make Sermon Notes from saved emails
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/sermon-note-generation
+ExecStart=/usr/bin/python3 -m sermon_notes.inbox
