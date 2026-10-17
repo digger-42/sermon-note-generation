@@ -98,7 +98,11 @@ def main(argv=None):
                     help="make a PDF even if %s is not installed" % FONT)
     args = ap.parse_args(argv)
 
-    raw = sys.stdin.buffer.read() if args.email == "-" else open(args.email, "rb").read()
+    if args.email == "-":
+        raw = sys.stdin.buffer.read()
+    else:
+        with open(args.email, "rb") as f:
+            raw = f.read()
     info = parse_email(read_email(raw))
 
     return generate(info, args)
