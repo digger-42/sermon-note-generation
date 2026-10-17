@@ -22,7 +22,7 @@ and `.pdf` for the upcoming Sunday. Options:
 
 ## Layout
 
-All text is AvenirNext LT Pro Regular: series and title 28 pt, speaker and
+Pages are US Letter (8.5 x 11 in). All text is AvenirNext LT Pro Regular: series and title 28 pt, speaker and
 date 20 pt, scripture 16 pt, a bold "Description:" heading and body at 16 pt.
 Every notes file ends with the Connect Card paragraph and the QR code.
 
