@@ -69,13 +69,22 @@ def convert_to_pdf(odt_path):
     if not soffice:
         raise SystemExit("LibreOffice (soffice) is needed to make the PDF")
     outdir = os.path.dirname(odt_path)
+    # LibreOffice's own bundled Python prints "Could not find platform
+    # independent libraries" when it inherits these, so leave them out.
+    env = {k: v for k, v in os.environ.items()
+           if k not in ("PYTHONHOME", "PYTHONPATH")}
     # A private profile lets this run even while LibreOffice is open elsewhere.
     with tempfile.TemporaryDirectory() as profile:
-        subprocess.run(
+        result = subprocess.run(
             [soffice, "-env:UserInstallation=file://" + profile, "--headless",
              "--convert-to", "pdf", "--outdir", outdir, odt_path],
-            check=True, stdout=subprocess.DEVNULL)
-    return os.path.splitext(odt_path)[0] + ".pdf"
+            env=env, capture_output=True, text=True)
+    pdf_path = os.path.splitext(odt_path)[0] + ".pdf"
+    # LibreOffice chatters on stderr even when it succeeds; show it only on failure.
+    if result.returncode != 0 or not os.path.exists(pdf_path):
+        sys.stderr.write(result.stderr)
+        raise SystemExit("LibreOffice could not make the PDF")
+    return pdf_path
 
 
 def main(argv=None):
