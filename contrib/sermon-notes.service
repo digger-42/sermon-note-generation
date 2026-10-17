@@ -1,0 +1,9 @@
+# Started by sermon-notes.path. start.watcher.sh installs this with
+# WorkingDirectory set to wherever the repo is cloned.
+[Unit]
+Description=Make Sermon Notes from saved emails
+
+[Service]
+Type=oneshot
+WorkingDirectory=/Projects/PCCMI/SermonNote-Generation/sermon-note-generation
+ExecStart=/usr/bin/python3 -m sermon_notes.inbox

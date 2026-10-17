@@ -1,93 +1,72 @@
 # sermon-note-generator
 
-
-
-## Getting started
-
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-* [Create](https://docs.gitlab.com/user/project/repository/web_editor/#create-a-file) or [upload](https://docs.gitlab.com/user/project/repository/web_editor/#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://gitlab.com/pccmi/sermon-note-generator.git
-git branch -M main
-git push -uf origin main
-```
-
-## Integrate with your tools
-
-* [Set up project integrations](https://gitlab.com/pccmi/sermon-note-generator/-/settings/integrations)
-
-## Collaborate with your team
-
-* [Invite team members and collaborators](https://docs.gitlab.com/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/user/project/merge_requests/creating_merge_requests/)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/topics/autodevops/requirements/)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+Builds the weekly PCCMI Sermon Notes from Katie Winstanley's
+"Sunday Morning Sermon Information" email: a LibreOffice Writer `.odt`, then a
+PDF of it for pccmi.org and the weekly email.
 
 ## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+```
+python3 -m sermon_notes.generate email.txt
+```
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+The email can be pasted text (use `-` and paste, then Ctrl-D) or a message
+Thunderbird saved as `.eml`. Katie's signature is ignored if it is there.
+This writes `/MaresLeg/Church/SermonNotes/<year>/YYYY-MM-DD-sermon-notes.odt`
+and `.pdf` for the upcoming Sunday. Options:
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+- `--date YYYY-MM-DD` sets the Sunday explicitly.
+- `--notes-dir DIR` is the SermonNotes folder (default `/MaresLeg/Church/SermonNotes`).
+- `--suffix ToddJones` adds a guest speaker's name to the file name.
+- `--no-pdf` makes only the `.odt`.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+## Layout
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+Pages are US Letter (8.5 x 11 in). All text is AvenirNext LT Pro Regular: series and title 28 pt, speaker and
+date 20 pt, scripture 16 pt, a bold "Description:" heading and body at 16 pt.
+Every notes file ends with the Connect Card paragraph and the QR code.
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+The QR code is copied byte for byte out of a past notes file and checked
+against a fixed SHA-256, so it is never re-encoded or altered. No documents or
+images are stored in this repository.
 
-## License
-For open source projects, say how it is licensed.
+The PDF is refused if AvenirNext LT Pro is not installed, because LibreOffice
+would otherwise substitute another font.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+## Requirements
+
+Python 3.10+, LibreOffice for the PDF (found on PATH, else the newest
+`/opt/libreoffice*/program/soffice`; set `SOFFICE` to override), and the AvenirNext LT Pro
+Regular font installed (`~/.local/share/fonts`, then `fc-cache -f`). No Python
+packages. Run the tests with `python3 -m unittest`.
+
+Speaker first names in the email are expanded with `sermon_notes/speakers.json`.
+
+## Automatic notes from Thunderbird
+
+A Thunderbird filter saves Katie's email into an inbox folder, and a systemd
+user unit notices the new file and runs `python3 -m sermon_notes.inbox`. Each
+email is moved to `SermonEmails/done` when its notes are made, or to
+`SermonEmails/failed` with a `.log` explaining why. A desktop notification
+says which happened.
+
+1. **Clone the repo** to `/Projects/PCCMI/SermonNote-Generation/sermon-note-generation`.
+2. **Install FiltaQuilla.** In Thunderbird open Tools > Add-ons and Themes,
+   search for FiltaQuilla and add it. In its options, tick
+   "Save Message as File" so the action appears in filters.
+3. **Create the filter.** Tools > Message Filters > New, named "Sermon Notes":
+   - Match all of: From contains `worship@pccmi.org`, and Subject contains
+     `Sunday Morning Sermon Information`.
+   - Action: Save Message as File, folder `/MaresLeg/Church/SermonEmails/inbox`.
+   - Run it on "Getting New Mail" (and "Manually Run").
+4. **Start the watcher:** run `./start.watcher.sh` from the repo. It pulls the
+   latest code, installs the systemd units pointed at wherever the repo is,
+   starts the watcher and shows its status. Run it again after any update.
+5. **Test it** with this week's email: select it, then Tools > Run Filters on
+   Selected Messages. The notes appear in `SermonNotes/<year>/` within a few
+   seconds. If they don't, check `SermonEmails/failed/` or
+   `journalctl --user -u sermon-notes.service`.
+
+The notes are always dated the Sunday after the day the email is processed,
+so re-running an older week's email would overwrite this week's files. Use
+`python3 -m sermon_notes.generate saved.eml --date YYYY-MM-DD` for those.
