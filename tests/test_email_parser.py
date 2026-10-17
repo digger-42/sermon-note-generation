@@ -14,9 +14,8 @@ Description: In this message, we will explore the many ways that Jesus saves.
 
 We'll take a deeper look at justification, sanctification, and glorification.
 """
-SIGNATURE = """
--- 
-Katie Winstanley
+# The signature separator is "-- " with a trailing space.
+SIGNATURE = "\n-- \n" + """Katie Winstanley
 
 Rooted.
 "Therefore, as you received Christ Jesus the Lord, so walk in him." Colossians 2:6-7
