@@ -49,8 +49,7 @@ email is moved to `SermonEmails/done` when its notes are made, or to
 `SermonEmails/failed` with a `.log` explaining why. A desktop notification
 says which happened.
 
-1. **Clone the repo** to `/Projects/PCCMI/SermonNote-Generation/sermon-note-generation`. If you put it elsewhere,
-   change `WorkingDirectory` in `contrib/sermon-notes.service` to match.
+1. **Clone the repo** to `/Projects/PCCMI/SermonNote-Generation/sermon-note-generation`.
 2. **Install FiltaQuilla.** In Thunderbird open Tools > Add-ons and Themes,
    search for FiltaQuilla and add it. In its options, tick
    "Save Message as File" so the action appears in filters.
@@ -59,13 +58,9 @@ says which happened.
      `Sunday Morning Sermon Information`.
    - Action: Save Message as File, folder `/MaresLeg/Church/SermonEmails/inbox`.
    - Run it on "Getting New Mail" (and "Manually Run").
-4. **Start the watcher** from the repo folder:
-   ```
-   mkdir -p ~/.config/systemd/user
-   cp contrib/sermon-notes.path contrib/sermon-notes.service ~/.config/systemd/user/
-   systemctl --user daemon-reload
-   systemctl --user enable --now sermon-notes.path
-   ```
+4. **Start the watcher:** run `./start.watcher.sh` from the repo. It pulls the
+   latest code, installs the systemd units pointed at wherever the repo is,
+   starts the watcher and shows its status. Run it again after any update.
 5. **Test it** with this week's email: select it, then Tools > Run Filters on
    Selected Messages. The notes appear in `SermonNotes/<year>/` within a few
    seconds. If they don't, check `SermonEmails/failed/` or

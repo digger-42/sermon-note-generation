@@ -1,5 +1,5 @@
-# Started by sermon-notes.path. WorkingDirectory is where the repo is cloned;
-# edit it if yours is somewhere else.
+# Started by sermon-notes.path. start.watcher.sh installs this with
+# WorkingDirectory set to wherever the repo is cloned.
 [Unit]
 Description=Make Sermon Notes from saved emails
 
