@@ -11,6 +11,7 @@ import glob
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -64,10 +65,34 @@ def font_installed():
     return FONT_FAMILY in out
 
 
+def _version_key(path):
+    # "/opt/libreoffice25.2/program/soffice" -> (25, 2), so 25.10 sorts after 25.2.
+    m = re.search(r"libreoffice(\d+(?:\.\d+)*)", path)
+    return tuple(int(n) for n in m.group(1).split(".")) if m else ()
+
+
+def find_soffice():
+    """Locate LibreOffice: $SOFFICE, then PATH, then the newest /opt install.
+
+    The LibreOffice.org packages install to /opt/libreofficeX.Y, which changes
+    with every version and is not on the PATH a systemd service gets.
+    """
+    if os.environ.get("SOFFICE"):
+        return os.environ["SOFFICE"]
+    found = shutil.which("soffice") or shutil.which("libreoffice")
+    if found:
+        return found
+    candidates = glob.glob("/opt/libreoffice*/program/soffice")
+    candidates.append("/usr/lib/libreoffice/program/soffice")
+    candidates = [c for c in candidates if os.access(c, os.X_OK)]
+    return max(candidates, key=_version_key) if candidates else None
+
+
 def convert_to_pdf(odt_path):
-    soffice = shutil.which("soffice") or shutil.which("libreoffice")
+    soffice = find_soffice()
     if not soffice:
-        raise SystemExit("LibreOffice (soffice) is needed to make the PDF")
+        raise SystemExit("LibreOffice (soffice) is needed to make the PDF. Install it, "
+                         "or set SOFFICE to its full path.")
     outdir = os.path.dirname(odt_path)
     # LibreOffice's own bundled Python prints "Could not find platform
     # independent libraries" when it inherits these, so leave them out.

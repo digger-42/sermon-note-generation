@@ -35,7 +35,8 @@ would otherwise substitute another font.
 
 ## Requirements
 
-Python 3.10+, LibreOffice (`soffice`) for the PDF, and the AvenirNext LT Pro
+Python 3.10+, LibreOffice for the PDF (found on PATH, else the newest
+`/opt/libreoffice*/program/soffice`; set `SOFFICE` to override), and the AvenirNext LT Pro
 Regular font installed (`~/.local/share/fonts`, then `fc-cache -f`). No Python
 packages. Run the tests with `python3 -m unittest`.
 
