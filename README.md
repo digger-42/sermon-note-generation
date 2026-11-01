@@ -67,6 +67,10 @@ says which happened.
    seconds. If they don't, check `SermonEmails/failed/` or
    `journalctl --user -u sermon-notes.service`.
 
+If the watcher misses an email or fails on it, run `./reprocess.email.sh`
+from the repo. It takes the most recently saved email from `inbox`, `done` or
+`failed` and makes the notes now, the same way the watcher would.
+
 The notes are always dated the Sunday after the day the email is processed,
 so re-running an older week's email would overwrite this week's files. Use
 `python3 -m sermon_notes.generate saved.eml --date YYYY-MM-DD` for those.
