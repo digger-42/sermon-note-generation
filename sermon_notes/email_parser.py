@@ -16,6 +16,8 @@ class SermonInfo:
     title: str = ""
     scripture: str = ""
     description: list = field(default_factory=list)  # one string per paragraph
+    # Each passage on its own, split at line breaks and semicolons.
+    scriptures: list = field(default_factory=list)
 
 
 def _strip_signature(text):
@@ -67,6 +69,9 @@ def parse_email(text):
             info.description = [p for p in paras if p]
         else:
             setattr(info, key, " ".join(value.split()))
+            if key == "scripture":
+                refs = (" ".join(r.split()) for r in re.split(r"[\n;]", value))
+                info.scriptures = [r for r in refs if r]
 
     missing = [f for f in ("series", "title", "scripture") if not getattr(info, f)]
     if not info.description:

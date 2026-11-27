@@ -20,6 +20,8 @@ import os
 import re
 import shutil
 import sys
+import zipfile
+from xml.sax.saxutils import escape
 
 from .email_parser import parse_email, read_email
 
@@ -117,9 +119,93 @@ def make(info, sunday, video_dir=DEFAULT_VIDEO_DIR, image_inbox=DEFAULT_IMAGE_IN
     return dest
 
 
+CONNECT_URL = "https://pccmi.breezechms.com/form/ce988b"
+# Styles added to the Template's own: single-spaced Notes paragraphs, centered
+# ones for the Connect Card block, and LibreOffice's standard link style for its two links.
+EXTRA_STYLES = (
+    '<style:style style:name="VDCenter" style:family="paragraph" '
+    'style:parent-style-name="Standard"><style:paragraph-properties fo:margin-left="0in" '
+    'fo:text-align="center" style:justify-single-word="false" fo:text-indent="0in" '
+    'style:auto-text-indent="false"/><style:text-properties '
+    'style:font-name="AvenirNext LT Pro Regular" fo:font-size="12pt" '
+    'style:font-size-asian="12pt" style:font-size-complex="12pt"/></style:style>'
+    '<style:style style:name="VDBody" style:family="paragraph" '
+    'style:parent-style-name="Standard"><style:paragraph-properties fo:margin-top="0in" '
+    'fo:margin-bottom="0in" style:contextual-spacing="false" fo:text-align="start"/>'
+    '<style:text-properties style:font-name="AvenirNext LT Pro Regular" fo:font-size="12pt" '
+    'style:font-size-asian="12pt" style:font-size-complex="12pt"/></style:style>'
+)
+LINK_STYLE = (
+    '<style:style style:name="Internet_20_link" style:display-name="Internet link" '
+    'style:family="text"><style:text-properties fo:color="#000080" '
+    'style:text-underline-style="solid" style:text-underline-width="auto" '
+    'style:text-underline-color="font-color"/></style:style>'
+)
+
+
+def _link(text):
+    return ('<text:a xlink:type="simple" xlink:href="%s" text:style-name="Internet_20_link">'
+            '%s</text:a>' % (CONNECT_URL, text))
+
+
+def _p(style, inner=""):
+    return '<text:p text:style-name="%s">%s</text:p>' % (style, inner)
+
+
+def _replace_one(pattern, repl, text, what):
+    new, n = re.subn(pattern, lambda m: repl, text, count=1, flags=re.S)
+    if n != 1:
+        raise SystemExit("The Morning Template no longer has its %s line" % what)
+    return new
+
+
+def fill_content(xml, info, sunday):
+    """Fill the Template's content.xml the way the finished weeks are filled in."""
+    heading = "%s: %s" % (info.series, info.title) if info.series else info.title
+    title = _p("P1", '<text:span text:style-name="T1">PCCMI </text:span>'
+                     '<text:span text:style-name="T2">Morning Worship</text:span>'
+                     '<text:span text:style-name="T1">: %s: </text:span>'
+                     '<text:span text:style-name="T8">%s</text:span>'
+               % (sunday.strftime("%m/%d/%Y"), escape(heading)))
+    xml = _replace_one(r'<text:p text:style-name="P1">.*?</text:p>', title, xml, "title")
+
+    refs = "".join(_p("P10", escape(r)) for r in (info.scriptures or [info.scripture]))
+    xml = _replace_one(r'<text:p text:style-name="P10">.*?</text:p>', refs, xml, "scripture")
+
+    notes = "".join(_p("VDBody", escape(d)) for d in info.description)
+    notes += _p("VDBody")
+    notes += _p("VDCenter", "One of the ways you can take your next step in faith")
+    notes += _p("VDCenter", "is by filling out the Connect Card.")
+    notes += _p("VDCenter", _link("Click the link") + " and let us know how we can help:")
+    notes += _p("VDBody")
+    notes += _p("VDCenter", _link(CONNECT_URL))
+    notes += _p("VDBody")
+    # Everything after the "Notes:" heading is the Template's empty lines.
+    xml = _replace_one(r'(?<=otes:</text:span></text:p>).*?(?=</office:text>)', notes, xml,
+                       "Notes")
+    return xml.replace("</office:automatic-styles>", EXTRA_STYLES + "</office:automatic-styles>")
+
+
+def fill_styles(xml):
+    if 'style:name="Internet_20_link"' in xml:
+        return xml
+    return xml.replace("</office:styles>", LINK_STYLE + "</office:styles>", 1)
+
+
 def fill_morning(path, info, sunday):
-    # Filled in once the Template and two finished weeks have been compared.
-    pass
+    with zipfile.ZipFile(path) as z:
+        entries = [(i, z.read(i)) for i in z.infolist()]
+    tmp = path + ".tmp"
+    with zipfile.ZipFile(tmp, "w") as out:
+        for item, data in entries:
+            if item.filename == "content.xml":
+                data = fill_content(data.decode("utf-8"), info, sunday).encode("utf-8")
+            elif item.filename == "styles.xml":
+                data = fill_styles(data.decode("utf-8")).encode("utf-8")
+            # mimetype must stay first and uncompressed; the rest are deflated.
+            kind = zipfile.ZIP_STORED if item.filename == "mimetype" else zipfile.ZIP_DEFLATED
+            out.writestr(item.filename, data, compress_type=kind)
+    os.replace(tmp, path)
 
 
 def main(argv=None):
