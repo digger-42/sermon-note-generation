@@ -55,7 +55,9 @@ def process(path, notes_dir, base):
             log.write("".join(traceback.format_exception(err)))
         notify("Could not make the notes", "%s: %s" % (os.path.basename(path), err))
         return False
-    notify("Notes are ready", os.path.splitext(odt)[0] + ".pdf")
+    pdf = os.path.splitext(odt)[0] + ".pdf"
+    notify("Notes are ready", pdf)
+    publish_notes(path, pdf, base)
     make_video(path, odt, base)
     move(path, os.path.join(base, "done"))
     return True
@@ -77,6 +79,19 @@ def make_video(path, odt, base):
     notify("Video Description is ready", dest)
     publish_video(path, dest, base)
     return dest
+
+
+def publish_notes(path, pdf, base):
+    """Copy the notes PDF over the one the website links to on Google Drive."""
+    try:
+        target = gdrive.publish_notes(pdf, os.environ.get("SERMON_GDRIVE_NOTES_PDF",
+                                                          gdrive.DEFAULT_NOTES_PDF))
+    except (Exception, SystemExit) as err:
+        log_failure(path, base, "notes-gdrive", err)
+        notify("Could not publish the Sermon Notes to Google Drive", str(err))
+        return None
+    notify("Sermon Notes are on Google Drive", target)
+    return target
 
 
 def publish_video(path, folder, base):

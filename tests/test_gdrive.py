@@ -74,5 +74,48 @@ class PublishTest(unittest.TestCase):
             gdrive.publish(os.path.dirname(self.folder), self.documents)
 
 
+class PublishNotesTest(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        root = self.tmp.name
+        self.drive = os.path.join(root, "google_drive")
+        self.dest = os.path.join(self.drive, "Sermon Notes", "pcc-sermon-notes.pdf")
+        self.pdf = os.path.join(root, "2026-11-29-sermon-notes.pdf")
+        with open(self.pdf, "wb") as f:
+            f.write(b"%PDF new week")
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def publish(self):
+        return gdrive.publish_notes(self.pdf, self.dest, drive=self.drive,
+                                    mount_script=os.path.join(self.tmp.name, "none"), wait=0)
+
+    def test_overwrites_same_file_in_place(self):
+        os.makedirs(os.path.dirname(self.dest))
+        with open(self.dest, "wb") as f:
+            f.write(b"%PDF last week, which was longer")
+        inode = os.stat(self.dest).st_ino
+        self.assertEqual(self.publish(), self.dest)
+        with open(self.dest, "rb") as f:
+            self.assertEqual(f.read(), b"%PDF new week")
+        self.assertEqual(os.stat(self.dest).st_ino, inode)
+        self.assertEqual(os.listdir(os.path.dirname(self.dest)), ["pcc-sermon-notes.pdf"])
+
+    def test_creates_file_when_missing(self):
+        os.makedirs(os.path.dirname(self.dest))
+        self.publish()
+        self.assertTrue(os.path.exists(self.dest))
+
+    def test_missing_pdf(self):
+        os.remove(self.pdf)
+        with self.assertRaises(SystemExit):
+            self.publish()
+
+    def test_drive_not_mounted(self):
+        with self.assertRaises(SystemExit):
+            self.publish()
+
+
 if __name__ == "__main__":
     unittest.main()
