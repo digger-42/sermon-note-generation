@@ -124,3 +124,14 @@ To publish by hand: `python3 -m sermon_notes.gdrive /MaresLeg/Church/SermonVideo
 Set `SERMON_GDRIVE_DOCUMENTS` (or `--documents`) if the Documents folder is
 elsewhere. If publishing fails, the local folder is still made and the reason
 is written to `SermonEmails/failed/<email>.gdrive.log`.
+
+### Sermon Notes PDF on Google Drive
+
+Right after the notes are made, the new PDF is copied over
+`~/google_drive/Sermon Notes/pcc-sermon-notes.pdf` (mounting the drive first
+if needed, as above). The file is rewritten in place rather than deleted and
+re-created, so the Drive file and the website's link to it stay the same.
+
+By hand: `python3 -m sermon_notes.gdrive /MaresLeg/Church/SermonNotes/2026/2026-11-29-sermon-notes.pdf`.
+Set `SERMON_GDRIVE_NOTES_PDF` (or `--notes-pdf`) to publish somewhere else.
+A failure is logged to `SermonEmails/failed/<email>.notes-gdrive.log`.
