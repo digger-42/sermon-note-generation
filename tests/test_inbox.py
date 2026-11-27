@@ -27,7 +27,8 @@ class LatestTest(unittest.TestCase):
 
     def run_latest(self, result="/notes/x.odt"):
         with mock.patch.object(inbox.generate, "main", return_value=result) as gen, \
-                mock.patch.object(inbox, "notify"), mock.patch("builtins.print"):
+                mock.patch.object(inbox, "notify"), mock.patch.object(inbox, "make_video"), \
+                mock.patch("builtins.print"):
             code = inbox.main(["--inbox", os.path.join(self.base, "inbox"),
                                "--notes-dir", "/notes", "--latest"])
         return code, gen

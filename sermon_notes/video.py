@@ -16,7 +16,6 @@ next week). Otherwise it is moved from the previous Sunday's folder.
 
 import argparse
 import datetime
-import glob
 import os
 import re
 import shutil

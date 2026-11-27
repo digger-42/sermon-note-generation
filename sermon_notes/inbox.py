@@ -13,6 +13,7 @@ or failed folders, for when the watcher missed an email or choked on it.
 """
 
 import argparse
+import datetime
 import glob
 import os
 import shutil
@@ -20,7 +21,8 @@ import subprocess
 import time
 import traceback
 
-from . import generate
+from . import generate, video
+from .email_parser import parse_email, read_email
 
 DEFAULT_INBOX = "/MaresLeg/Church/SermonEmails/inbox"
 # Leave files alone until Thunderbird has finished writing them.
@@ -53,9 +55,30 @@ def process(path, notes_dir, base):
             log.write("".join(traceback.format_exception(err)))
         notify("Could not make the notes", "%s: %s" % (os.path.basename(path), err))
         return False
-    move(path, os.path.join(base, "done"))
     notify("Notes are ready", os.path.splitext(odt)[0] + ".pdf")
+    make_video(path, odt, base)
+    move(path, os.path.join(base, "done"))
     return True
+
+
+def make_video(path, odt, base):
+    """Make the Video Description folder for the same Sunday as the notes."""
+    try:
+        sunday = datetime.date.fromisoformat(os.path.basename(odt)[:10])
+        with open(path, "rb") as f:
+            info = parse_email(read_email(f.read()))
+        dest = video.make(info, sunday,
+                          os.environ.get("SERMON_VIDEO_DIR", video.DEFAULT_VIDEO_DIR),
+                          os.path.join(base, "inbox"))
+    except (Exception, SystemExit) as err:
+        log = os.path.join(base, "failed", os.path.basename(path) + ".video.log")
+        os.makedirs(os.path.dirname(log), exist_ok=True)
+        with open(log, "w") as f:
+            f.write("".join(traceback.format_exception(err)))
+        notify("Could not make the Video Description", str(err))
+        return None
+    notify("Video Description is ready", dest)
+    return dest
 
 
 def latest_email(base):
