@@ -102,11 +102,21 @@ def bring_image(dest, previous, image_inbox):
     return None
 
 
+def year_template(video_dir, year):
+    """This year's Template folder, started from last year's on the first Sunday of a year."""
+    template = os.path.join(video_dir, str(year), TEMPLATE)
+    if not os.path.isdir(template):
+        last = os.path.join(video_dir, str(year - 1), TEMPLATE)
+        if os.path.isdir(last):
+            shutil.copytree(last, template)
+    return template
+
+
 def make(info, sunday, video_dir=DEFAULT_VIDEO_DIR, image_inbox=DEFAULT_IMAGE_INBOX):
     year_dir = os.path.join(video_dir, str(sunday.year))
     dest = os.path.join(year_dir, sunday.isoformat())
     previous = previous_week_dir(video_dir, sunday)
-    copy_template(os.path.join(year_dir, TEMPLATE), dest)
+    copy_template(year_template(video_dir, sunday.year), dest)
     evening = os.path.join(dest, EVENING)
     if os.path.exists(evening):
         os.remove(evening)

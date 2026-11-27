@@ -91,6 +91,12 @@ description in `/MaresLeg/Church/SermonVideo/<year>/YYYY-MM-DD/`:
    date, "Series: Title" on the first line, each scripture passage on its own
    line, and under Notes the description followed by the Connect Card link.
 
+On the first Sunday of a new year (an email on Dec 31 is for Jan 3, 2027),
+everything goes under the new year: the notes in `SermonNotes/2027`, the
+video folder in `SermonVideo/2027`, whose `Template` is started as a copy of
+the 2026 one if you haven't made it yet. The image still comes from the last
+Sunday in `SermonVideo/2026`.
+
 Running it again for the same Sunday refills the Morning file from the
 Template and leaves the image and any other files alone. To run it by hand:
 

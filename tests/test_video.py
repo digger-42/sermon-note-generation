@@ -117,9 +117,25 @@ class VideoFolderTest(unittest.TestCase):
         prev = video.previous_week_dir(self.video_dir, datetime.date(2026, 1, 4))
         self.assertTrue(prev.endswith("2025-12-28"))
 
+    def test_new_year(self):
+        # An email on Thursday 2026-12-31 is for Sunday 2027-01-03.
+        from sermon_notes.generate import upcoming_sunday
+        sunday = upcoming_sunday(datetime.date(2026, 12, 31))
+        self.assertEqual(sunday, datetime.date(2027, 1, 3))
+        os.rename(self.last, os.path.join(self.year, "2026-12-27"))
+        dest = video.make(self.info, sunday, self.video_dir, self.inbox)
+        self.assertEqual(dest, os.path.join(self.video_dir, "2027", "2027-01-03"))
+        self.assertEqual(sorted(os.listdir(dest)),
+                         sorted([video.MORNING, "notes.txt", "series.png"]))
+        self.assertIn("Worship: 01/03/2027: Series: Title\n",
+                      body_text(os.path.join(dest, video.MORNING)))
+        # 2027 gets its own Template, copied from 2026's, which is left as it was.
+        self.assertIn(video.EVENING, os.listdir(os.path.join(self.video_dir, "2027", "Template")))
+        self.assertIn(video.EVENING, os.listdir(os.path.join(self.year, "Template")))
+
     def test_missing_template(self):
         with self.assertRaises(SystemExit):
-            video.make(self.info, datetime.date(2027, 1, 3), self.video_dir, self.inbox)
+            video.make(self.info, datetime.date(2028, 1, 2), self.video_dir, self.inbox)
 
 
 class FillMorningTest(unittest.TestCase):
