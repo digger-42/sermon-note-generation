@@ -21,7 +21,7 @@ import subprocess
 import time
 import traceback
 
-from . import generate, video
+from . import gdrive, generate, video
 from .email_parser import parse_email, read_email
 
 DEFAULT_INBOX = "/MaresLeg/Church/SermonEmails/inbox"
@@ -71,14 +71,32 @@ def make_video(path, odt, base):
                           os.environ.get("SERMON_VIDEO_DIR", video.DEFAULT_VIDEO_DIR),
                           os.path.join(base, "inbox"))
     except (Exception, SystemExit) as err:
-        log = os.path.join(base, "failed", os.path.basename(path) + ".video.log")
-        os.makedirs(os.path.dirname(log), exist_ok=True)
-        with open(log, "w") as f:
-            f.write("".join(traceback.format_exception(err)))
+        log_failure(path, base, "video", err)
         notify("Could not make the Video Description", str(err))
         return None
     notify("Video Description is ready", dest)
+    publish_video(path, dest, base)
     return dest
+
+
+def publish_video(path, folder, base):
+    """Copy the new Video Description folder to the Google Drive."""
+    try:
+        target = gdrive.publish(folder, os.environ.get("SERMON_GDRIVE_DOCUMENTS",
+                                                       gdrive.DEFAULT_DOCUMENTS))
+    except (Exception, SystemExit) as err:
+        log_failure(path, base, "gdrive", err)
+        notify("Could not publish the Video Description to Google Drive", str(err))
+        return None
+    notify("Video Description is on Google Drive", target)
+    return target
+
+
+def log_failure(path, base, step, err):
+    log = os.path.join(base, "failed", "%s.%s.log" % (os.path.basename(path), step))
+    os.makedirs(os.path.dirname(log), exist_ok=True)
+    with open(log, "w") as f:
+        f.write("".join(traceback.format_exception(err)))
 
 
 def latest_email(base):
