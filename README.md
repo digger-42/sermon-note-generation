@@ -71,6 +71,39 @@ If the watcher misses an email or fails on it, run `./reprocess.email.sh`
 from the repo. It takes the most recently saved email from `inbox`, `done` or
 `failed` and makes the notes now, the same way the watcher would.
 
-The notes are always dated the Sunday after the day the email is processed,
-so re-running an older week's email would overwrite this week's files. Use
+The notes are always dated the Sunday after the day the email is processed
+(the week rolls over at midnight Saturday night, so an email processed on a
+Sunday is for the following Sunday), so re-running an older week's email would overwrite this week's files. Use
 `python3 -m sermon_notes.generate saved.eml --date YYYY-MM-DD` for those.
+
+## Video Description
+
+After the watcher makes the notes, it also sets up that Sunday's YouTube
+description in `/MaresLeg/Church/SermonVideo/<year>/YYYY-MM-DD/`:
+
+1. Everything in `SermonVideo/<year>/Template` is copied in.
+2. `Evening-PCCMI-Video-Description.odt` is deleted (not used for now).
+3. The series image: if an image is waiting in `SermonEmails/inbox`, it is
+   copied in and the inbox copy is filed in `SermonEmails/done`. Otherwise
+   the image is moved from the previous Sunday's folder. Images in the inbox
+   are never treated as emails.
+4. `Morning-PCCMI-Video-Description.odt` is filled from the same email: the
+   date, "Series: Title" on the first line, each scripture passage on its own
+   line, and under Notes the description followed by the Connect Card link.
+
+On the first Sunday of a new year (an email on Dec 31 is for Jan 3, 2027),
+everything goes under the new year: the notes in `SermonNotes/2027`, the
+video folder in `SermonVideo/2027`, whose `Template` is started as a copy of
+the 2026 one (without the Evening file) if you haven't made it yet. The image still comes from the last
+Sunday in `SermonVideo/2026`.
+
+Running it again for the same Sunday refills the Morning file from the
+Template and leaves the image and any other files alone. To run it by hand:
+
+```
+python3 -m sermon_notes.video saved.eml [--date YYYY-MM-DD]
+```
+
+Set `SERMON_VIDEO_DIR` (or `--video-dir`) if the SermonVideo folder is
+somewhere else. If this step fails, the notes are still made and the reason is
+written to `SermonEmails/failed/<email>.video.log`.
