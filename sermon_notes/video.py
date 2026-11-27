@@ -25,8 +25,8 @@ from xml.sax.saxutils import escape
 
 from .email_parser import parse_email, read_email
 
-DEFAULT_VIDEO_DIR = "/media/dan/MaresLeg/Church/SermonVideo"
-DEFAULT_IMAGE_INBOX = "/media/dan/MaresLeg/Church/SermonEmails/inbox"
+DEFAULT_VIDEO_DIR = "/MaresLeg/Church/SermonVideo"
+DEFAULT_IMAGE_INBOX = "/MaresLeg/Church/SermonEmails/inbox"
 TEMPLATE = "Template"
 MORNING = "Morning-PCCMI-Video-Description.odt"
 EVENING = "Evening-PCCMI-Video-Description.odt"

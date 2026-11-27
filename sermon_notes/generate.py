@@ -31,8 +31,9 @@ SPEAKERS = os.path.join(os.path.dirname(__file__), "speakers.json")
 
 
 def upcoming_sunday(today):
-    # Notes are always for the next Sunday; on a Sunday that is today.
-    return today + datetime.timedelta(days=(6 - today.weekday()) % 7)
+    # Notes are always for the next Sunday. The week rolls over at midnight
+    # Saturday night, so an email processed on a Sunday is for the one after.
+    return today + datetime.timedelta(days=(6 - today.weekday()) % 7 or 7)
 
 
 def full_speaker_name(name):

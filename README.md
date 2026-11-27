@@ -71,14 +71,15 @@ If the watcher misses an email or fails on it, run `./reprocess.email.sh`
 from the repo. It takes the most recently saved email from `inbox`, `done` or
 `failed` and makes the notes now, the same way the watcher would.
 
-The notes are always dated the Sunday after the day the email is processed,
-so re-running an older week's email would overwrite this week's files. Use
+The notes are always dated the Sunday after the day the email is processed
+(the week rolls over at midnight Saturday night, so an email processed on a
+Sunday is for the following Sunday), so re-running an older week's email would overwrite this week's files. Use
 `python3 -m sermon_notes.generate saved.eml --date YYYY-MM-DD` for those.
 
 ## Video Description
 
 After the watcher makes the notes, it also sets up that Sunday's YouTube
-description in `/media/dan/MaresLeg/Church/SermonVideo/<year>/YYYY-MM-DD/`:
+description in `/MaresLeg/Church/SermonVideo/<year>/YYYY-MM-DD/`:
 
 1. Everything in `SermonVideo/<year>/Template` is copied in.
 2. `Evening-PCCMI-Video-Description.odt` is deleted (not used for now).
