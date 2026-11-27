@@ -51,7 +51,7 @@ class PublishTest(unittest.TestCase):
         os.makedirs(self.drive)
         with open(self.mount, "w") as f:
             f.write("#!/bin/sh\n")
-        os.chmod(self.mount, 0o755)
+        os.chmod(self.mount, 0o700)
 
         def mount(cmd, check):
             os.makedirs(self.documents)
