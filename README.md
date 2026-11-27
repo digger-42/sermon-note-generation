@@ -107,3 +107,20 @@ python3 -m sermon_notes.video saved.eml [--date YYYY-MM-DD]
 Set `SERMON_VIDEO_DIR` (or `--video-dir`) if the SermonVideo folder is
 somewhere else. If this step fails, the notes are still made and the reason is
 written to `SermonEmails/failed/<email>.video.log`.
+
+### Publishing to Google Drive
+
+Once the Video Description folder is made, it is published for the church's
+video computer:
+
+1. If `~/google_drive` is empty, `~/bin/mount-google-drive` is run to mount
+   it (the watcher waits up to a minute for the files to appear).
+2. Earlier dated folders (`YYYY-MM-DD`) in
+   `~/google_drive/Video Design Assets/Documents` are removed. Folders for
+   later Sundays and anything not named by date are left alone.
+3. The new `SermonVideo/<year>/YYYY-MM-DD` folder is copied there whole.
+
+To publish by hand: `python3 -m sermon_notes.gdrive /MaresLeg/Church/SermonVideo/2026/2026-11-29`.
+Set `SERMON_GDRIVE_DOCUMENTS` (or `--documents`) if the Documents folder is
+elsewhere. If publishing fails, the local folder is still made and the reason
+is written to `SermonEmails/failed/<email>.gdrive.log`.
