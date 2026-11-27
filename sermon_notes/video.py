@@ -108,7 +108,8 @@ def year_template(video_dir, year):
     if not os.path.isdir(template):
         last = os.path.join(video_dir, str(year - 1), TEMPLATE)
         if os.path.isdir(last):
-            shutil.copytree(last, template)
+            # The Evening description isn't used, so the new year starts without it.
+            shutil.copytree(last, template, ignore=shutil.ignore_patterns(EVENING))
     return template
 
 

@@ -129,8 +129,10 @@ class VideoFolderTest(unittest.TestCase):
                          sorted([video.MORNING, "notes.txt", "series.png"]))
         self.assertIn("Worship: 01/03/2027: Series: Title\n",
                       body_text(os.path.join(dest, video.MORNING)))
-        # 2027 gets its own Template, copied from 2026's, which is left as it was.
-        self.assertIn(video.EVENING, os.listdir(os.path.join(self.video_dir, "2027", "Template")))
+        # 2027 gets its own Template, copied from 2026's without the Evening file,
+        # and 2026's is left as it was.
+        self.assertEqual(sorted(os.listdir(os.path.join(self.video_dir, "2027", "Template"))),
+                         sorted([video.MORNING, "notes.txt"]))
         self.assertIn(video.EVENING, os.listdir(os.path.join(self.year, "Template")))
 
     def test_missing_template(self):

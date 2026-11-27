@@ -94,7 +94,7 @@ description in `/MaresLeg/Church/SermonVideo/<year>/YYYY-MM-DD/`:
 On the first Sunday of a new year (an email on Dec 31 is for Jan 3, 2027),
 everything goes under the new year: the notes in `SermonNotes/2027`, the
 video folder in `SermonVideo/2027`, whose `Template` is started as a copy of
-the 2026 one if you haven't made it yet. The image still comes from the last
+the 2026 one (without the Evening file) if you haven't made it yet. The image still comes from the last
 Sunday in `SermonVideo/2026`.
 
 Running it again for the same Sunday refills the Morning file from the
